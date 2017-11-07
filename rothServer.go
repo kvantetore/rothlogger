@@ -24,7 +24,6 @@ const (
 
 //Sensor represents a state of one of the Roth thermostat sensors.
 type Sensor struct {
-	
 	Id int
 	Name string
 	RoomTemperature float32
@@ -33,15 +32,18 @@ type Sensor struct {
 }
 
 const (
-	ValveOpen   = 1
-	ValveClosed = 0 
+	//ValveOpen represents a valve in its open state
+	ValveOpen   = "open"
+
+	//ValveClosed represents a valve in its closed state
+	ValveClosed = "closed"
 )
 
 
 //GetValveState returns the current state of the valve connected (open/closed) to the sensor.
 //This is currently derived from room and target temperature, as the roth server does not expose
 //the valve state directly.
-func (s Sensor) GetValveState() int {
+func (s Sensor) GetValveState() string {
 	if s.RoomTemperature < s.TargetTemperature {
 		return ValveOpen
 	} 

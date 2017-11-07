@@ -3,84 +3,62 @@ package main
 import (
 	"time"
 	"fmt"
-	"github.com/influxdata/influxdb/client/v2"
 )
 
 const (
 	rothManagementURL = "http://ROTH-01A6D5"
 	influxServer = "http://pi:8086"
-	influxDb = "test"
-)
+	influxDb = "home"
+	thermostatMeasurement = "thermostats"
+ )
 
 func main() {
-	fmt.Printf("Hello World!\n")
-
+	fmt.Printf("Starting logging thermostat data!\n")
+	fmt.Printf("    ROTH Touchline management unit: %v\n", rothManagementURL)
+	fmt.Printf("    Storing thermostat data in influx server %v, database %v, measurement %v\n", influxServer, influxDb, thermostatMeasurement)
+	
+	//setup
+	fmt.Printf("Setting up...")
 	sensorCount, err := GetSensorCount(rothManagementURL)
 	if err != nil {
 		fmt.Printf("Error fetching sensors, %v\n", err)
 		return
 	}
 
-	sensors, err := GetSensors(rothManagementURL, sensorCount)
-	if err != nil {
-		fmt.Printf("Error fetching sensors, %v\n", err)
-		return
-	}
-
-	for i := 0; i<len(sensors); i++ {
-		fmt.Printf("%v: %v\n", sensors[i].Name, sensors[i].RoomTemperature)
-	}
-
-	//create influx client
-	cli, err := client.NewHTTPClient(client.HTTPConfig {
-		Addr: influxServer,
-	})
-	if err != nil {
-		fmt.Printf("Failed to create HTTP Client %v\n", err)
-		return
-	}
-	defer cli.Close()
-
-	// Create a new point batch
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  influxDb,
-		Precision: "s",
-	})
-	if err != nil {
-		fmt.Printf("Error creating batch points %v\n", err)
-		return
-	}
-
-	//create points
-	currentTime := time.Now();
-	for sensorIndex:=0; sensorIndex<len(sensors); sensorIndex++ {
-		sensor := sensors[sensorIndex];
-
-		// Create a point and add to batch
-		tags := map[string]string{
-			"sensor_name": sensor.Name,
-			"sensor_id": fmt.Sprintf("%v", sensor.Id),
-			"valve_state": fmt.Sprintf("%v", sensor.GetValveState()),
-			"program": fmt.Sprintf("%v", sensor.Program),
-		}
-		fields := map[string]interface{}{
-			"roomTemperature": sensor.RoomTemperature,
-			"targetTemperature": sensor.TargetTemperature,
-		}
-
-		pt, err := client.NewPoint("thermostats", tags, fields, currentTime)
+	influxSettings := InfluxSettings {
+		serverURL: influxServer,
+		dbName: influxDb,
+		measurementName: thermostatMeasurement,
+	}	
+	fmt.Printf("done\n")
+	
+	//do measurement
+	performMeasurement := func() {
+		sensors, err := GetSensors(rothManagementURL, sensorCount)
 		if err != nil {
-			fmt.Printf("Error creating new point, %v\n", err)
+			fmt.Printf("Error fetching sensors, %v\n", err)
 			return
 		}
-		bp.AddPoint(pt)
+
+		fmt.Printf("Got sensor data %v\n", time.Now())
+		for i := 0; i<len(sensors); i++ {
+		 	fmt.Printf("%v: %v %v (%s)\n", sensors[i].Name, sensors[i].RoomTemperature, sensors[i].TargetTemperature, sensors[i].GetValveState())
+		}
+		fmt.Println("")
+
+		err = StoreSensorData(influxSettings, sensors);
+		if err != nil {
+			fmt.Printf("Error storing sensor data, %v\n", err)
+		}
 	}
 
-	// Write the batch
-	if err := cli.Write(bp); err != nil {
-		fmt.Printf("error writing points, %v", err)
-		return
+	//create timer that runs measurement 
+	interval := time.Minute * 1
+	fmt.Printf("Running logger every %v...\n", interval)
+	ticker := time.NewTicker(interval)
+	for {
+		performMeasurement()
+		<- ticker.C
 	}
-
 
 }
