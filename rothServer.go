@@ -50,6 +50,14 @@ func (s Sensor) GetValveState() string {
 	return ValveClosed
 }
 
+func (s Sensor) GetValveValue() int32 {
+	if s.RoomTemperature < s.TargetTemperature {
+		return 1
+	} 
+	return 0
+}
+
+
 /*
 Example request: POST http://ROTH-10A6D5/cgi-bin/ILRReadValues.cgi
 <body>

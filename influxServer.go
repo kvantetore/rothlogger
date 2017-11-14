@@ -48,6 +48,7 @@ func StoreSensorData(settings InfluxSettings, sensors []Sensor) error {
 		fields := map[string]interface{}{
 			"roomTemperature": sensor.RoomTemperature,
 			"targetTemperature": sensor.TargetTemperature,
+			"valve_value": sensor.GetValveValue(),
 		}
 
 		pt, err := client.NewPoint(settings.measurementName, tags, fields, currentTime)
