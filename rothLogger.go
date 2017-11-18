@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"fmt"
+	"github.com/kvantetore/rothTouchline"
 )
 
 const (
@@ -19,7 +20,7 @@ func main() {
 	
 	//setup
 	fmt.Printf("Setting up...")
-	sensorCount, err := GetSensorCount(rothManagementURL)
+	sensorCount, err := roth.GetSensorCount(rothManagementURL)
 	if err != nil {
 		fmt.Printf("Error fetching sensors, %v\n", err)
 		return
@@ -34,7 +35,7 @@ func main() {
 	
 	//do measurement
 	performMeasurement := func() {
-		sensors, err := GetSensors(rothManagementURL, sensorCount)
+		sensors, err := roth.GetSensors(rothManagementURL, sensorCount)
 		if err != nil {
 			fmt.Printf("Error fetching sensors, %v\n", err)
 			return
