@@ -5,6 +5,7 @@ import (
 	"time"
 	"fmt"
 	"github.com/influxdata/influxdb/client/v2"
+	"github.com/kvantetore/rothTouchline"
 )
 
 type InfluxSettings struct {
@@ -14,7 +15,7 @@ type InfluxSettings struct {
 }
 
  //StoreSensorData saves the current state of the sensors to an influxdb measurement
-func StoreSensorData(settings InfluxSettings, sensors []Sensor) error {
+func StoreSensorData(settings InfluxSettings, sensors []roth.Sensor) error {
 	//create influx client
 	cli, err := client.NewHTTPClient(client.HTTPConfig {
 		Addr: settings.serverURL,
@@ -44,7 +45,7 @@ func StoreSensorData(settings InfluxSettings, sensors []Sensor) error {
 			"sensor_id": fmt.Sprintf("%v", sensor.Id),
 			"valve_state": fmt.Sprintf("%v", sensor.GetValveState()),
 			"program": fmt.Sprintf("%v", sensor.Program),
-			"mode": sensor.Mode,
+			"mode": fmt.Sprintf("%v", sensor.Mode),
 		}
 		fields := map[string]interface{}{
 			"roomTemperature": sensor.RoomTemperature,
