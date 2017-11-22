@@ -44,6 +44,7 @@ func StoreSensorData(settings InfluxSettings, sensors []Sensor) error {
 			"sensor_id": fmt.Sprintf("%v", sensor.Id),
 			"valve_state": fmt.Sprintf("%v", sensor.GetValveState()),
 			"program": fmt.Sprintf("%v", sensor.Program),
+			"mode": sensor.Mode,
 		}
 		fields := map[string]interface{}{
 			"roomTemperature": sensor.RoomTemperature,
