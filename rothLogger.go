@@ -7,26 +7,14 @@ import (
 	"github.com/kvantetore/rothTouchline"
 )
 
-const (
-	rothManagementURL = "http://ROTH-01A6D5"
-	influxServer = "http://pi:8086"
-	influxDb = "home"
-	thermostatMeasurement = "thermostats"
- )
+//const (
+//	rothManagementURL = "http://ROTH-01A6D5"
+//	influxServer = "http://pi:8086"
+//	influxDb = "home"
+//	thermostatMeasurement = "thermostats"
+// )
 
 func main() {
-	fmt.Printf("Starting logging thermostat data!\n")
-	fmt.Printf("    ROTH Touchline management unit: %v\n", rothManagementURL)
-	fmt.Printf("    Storing thermostat data in influx server %v, database %v, measurement %v\n", influxServer, influxDb, thermostatMeasurement)
-	
-	//setup
-	fmt.Printf("Setting up...")
-	sensorCount, err := roth.GetSensorCount(rothManagementURL)
-	if err != nil {
-		fmt.Printf("Error fetching sensors, %v\n", err)
-		return
-	}
-
 	rothUrl := os.Getenv("ROTH_URL")
 
 	influxSettings := InfluxSettings {
@@ -36,6 +24,19 @@ func main() {
 		username: os.Getenv("INFLUX_USERNAME"),
 		password: os.Getenv("INFLUX_PASSWORD"),
 	}	
+
+
+	fmt.Printf("Starting logging thermostat data!\n")
+	fmt.Printf("    ROTH Touchline management unit: %v\n", rothUrl)
+	fmt.Printf("    Storing thermostat data in influx server %v, database %v, measurement %v\n", influxSettings.serverURL, influxSettings.dbName, influxSettings.measurementName)
+	
+	//setup
+	fmt.Printf("Setting up...")
+	sensorCount, err := roth.GetSensorCount(rothUrl)
+	if err != nil {
+		fmt.Printf("Error fetching sensors, %v\n", err)
+		return
+	}
 	fmt.Printf("done\n")
 	
 	//do measurement
