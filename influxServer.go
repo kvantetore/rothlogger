@@ -4,13 +4,15 @@ package main
 import (
 	"time"
 	"fmt"
-	"github.com/influxdata/influxdb/client/v2"
+	"github.com/influxdata/influxdb1-client/v2"
 	"github.com/kvantetore/rothTouchline"
 )
 
 type InfluxSettings struct {
 	serverURL string
 	dbName string
+	username string
+	password string
 	measurementName string
 }
 
@@ -19,6 +21,8 @@ func StoreSensorData(settings InfluxSettings, sensors []roth.Sensor) error {
 	//create influx client
 	cli, err := client.NewHTTPClient(client.HTTPConfig {
 		Addr: settings.serverURL,
+		Username: settings.username,
+		Password: settings.password,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to create HTTP Client, %v", err)

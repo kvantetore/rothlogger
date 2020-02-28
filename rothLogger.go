@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 	"fmt"
 	"github.com/kvantetore/rothTouchline"
@@ -26,16 +27,20 @@ func main() {
 		return
 	}
 
+	rothUrl := os.Getenv("ROTH_URL")
+
 	influxSettings := InfluxSettings {
-		serverURL: influxServer,
-		dbName: influxDb,
-		measurementName: thermostatMeasurement,
+		serverURL: os.Getenv("INFLUX_URL"),
+		dbName: os.Getenv("INFLUX_DB"),
+		measurementName: os.Getenv("INFLUX_MEASUREMENT"),
+		username: os.Getenv("INFLUX_USERNAME"),
+		password: os.Getenv("INFLUX_PASSWORD"),
 	}	
 	fmt.Printf("done\n")
 	
 	//do measurement
 	performMeasurement := func() {
-		sensors, err := roth.GetSensors(rothManagementURL, sensorCount)
+		sensors, err := roth.GetSensors(rothUrl, sensorCount)
 		if err != nil {
 			fmt.Printf("Error fetching sensors, %v\n", err)
 			return
